@@ -8,10 +8,18 @@ from shutil import copyfile
 # Edits:
 # 12/5/2016:
     # Validated pipeline on OSX to completion
+    # Validated pipeline on Linux to completion
     # Removed some typing errors
         # To Do:
-            # Validate pipeline on Linux
-            # sys.platform check if changes needed.
+            # Further cleanup of file output:
+                # rawname.bam
+                # rawname.bcf
+                # rawname.log
+                # ref.sma
+                # ref.smi
+                # refrence.fasta.fai
+            # Move VCF's to directory?
+            # Create report from identical SNPs?
 
 # User input
 print '##############################'
@@ -157,7 +165,7 @@ print ''
 print 'rawvcf:'
 print rawvcf
 print ''
-# exit(1)
+
 
 # Index generation
 print ''
@@ -179,10 +187,12 @@ print ''
 print ''
 print 'Index prepared!'
 print ''
-time.sleep(2)
+time.sleep(1)
 print ''
 print 'Preparing samtools index...'
+time.sleep(1)
 print ''
+print 'Index prepared!'
 subprocess.call(['samtools', 'faidx', str(directory1)])
 print ''
 print ''
@@ -198,7 +208,7 @@ time.sleep(1)
 print '...'
 time.sleep(1)
 print '....'
-time.sleep(2)
+time.sleep(1)
 print ''
 print ''
 
@@ -211,13 +221,7 @@ print ''
 print '         WARNING!'
 print 'This process will take some time.'
 print ''
-time.sleep(1)
-print '.'
-time.sleep(1)
-print '..'
-time.sleep(1)
-print '...'
-time.sleep(2)
+time.sleep(3)
 print ''
 for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
     subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
@@ -255,7 +259,7 @@ time.sleep(1)
 print '...'
 time.sleep(1)
 
-# SAM conversion (needs work - '-bS' throwing error. OSX working, check samtools ver on lin02.)
+# SAM conversion
 print ''
 print 'Converting SAM -> BAM...'
 print ''
@@ -265,8 +269,12 @@ print ''
 print 'DONE!'
 print ''
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(1)
+
 
 # SAM removal (optional)
 if choiceremoval in choiceyes:
@@ -280,10 +288,7 @@ if choiceremoval in choiceyes:
     print ''
     print 'DONE!'
     print ''
-    print '.'
-    print '..'
-    print '...'
-
+    time.sleep(1)
 # BAM sort
 print ''
 print 'Sorting BAM files...'
@@ -294,8 +299,11 @@ print ''
 print 'DONE!'
 print ''
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(1)
 
 # BAM removal (optional)
 if choiceremoval in choiceyes:
@@ -309,9 +317,7 @@ if choiceremoval in choiceyes:
     print ''
     print 'DONE!'
     print ''
-    print '.'
-    print '..'
-    print '...'
+    time.sleep(1)
 
 # BAM rmdup
 print ''
@@ -323,8 +329,11 @@ print ''
 print 'DONE!'
 print ''
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(1)
 
 # BAM sort removal (optional)
 if choiceremoval in choiceyes:
@@ -338,9 +347,7 @@ if choiceremoval in choiceyes:
     print ''
     print 'DONE!'
     print ''
-    print '.'
-    print '..'
-    print '...'
+    time.sleep(1)
 
 # BCF/VCF generation
 print ''
@@ -358,7 +365,7 @@ for pileup, vcfraw, in zip(pileupbcf, rawvcf):
 print '...'
 # Final VCF (overwrites intermediate)
 for vcf, in zip(rawvcf):
-    subprocess.call(['vcftools', '--vcf', vcf, '--remove-indels', '--minQ', '30', '--minDP', '8', '--max-maf', '0.1', '--recode-INFO-all', '--recode'])
+    subprocess.call(['vcftools', '--vcf', vcf, '--remove-indels', '--minQ', '30', '--minDP', '8', '--max-maf', '0.1', '--recode-INFO-all'])
 print '...'
 print ''
 print ''
