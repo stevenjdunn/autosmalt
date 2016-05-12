@@ -12,14 +12,14 @@ from shutil import copyfile
     # Tried to break it, found error when aligning extremely different sequences (i.e. different genera)
     # Removed some typing errors
         # To Do:
-            # Further cleanup of file output (done, untested):
+            # Further cleanup of file output (tested, not working, hashed):
                 # rawname.bam
                 # rawname.bcf
                 # rawname.log
                 # ref.sma
                 # ref.smi
                 # refrence.fasta.fai
-            # Move VCF's to directory? (done, untested)
+            # Move VCF's to directory? (untested, hashed)
             # Create report from identical SNPs?
 
 # User input
@@ -374,30 +374,30 @@ print '##       DONE!      ##'
 print '#######################'
 
 # VCF Move
-outputfolder1 = directory
-outputfolder1 += 'vcf/'
-if not os.path.exists(outputfolder1):
-    os.mkdir(outputfolder1)
-movetarget = [outputfolder1 + x for x in vcfraw]
-for move, target, in zip(vcfraw, movetarget):
-    subprocess.call('mv', move, target)
+#outputfolder1 = directory
+#outputfolder1 += 'vcf/'
+#if not os.path.exists(outputfolder1):
+#    os.mkdir(outputfolder1)
+#movetarget = [outputfolder1 + x for x in vcfraw]
+#for move, target, in zip(vcfraw, movetarget):
+#    subprocess.call('mv', move, target)
 
 # Final removal (optional)
-if choiceremoval in choiceyes:
-    miscremoval = ['ref.smi', 'ref.sma', 'reference.fasta.fai']
-    print ''
-    print 'Removing temporary files.'
-    print '.'
-    print '..'
-    print '...'
-    for rmv, in zip(samtoolsfinal):
-        subprocess.call(['rm', rmv])
-    for rmv in zip(miscremoval):
-        subprocess.call(['rm', rmv])
-    print ''
-    print 'DONE!'
-    print ''
-    time.sleep(1)
+#if choiceremoval in choiceyes:
+   # miscremoval = ['ref.smi', 'ref.sma', 'reference.fasta.fai']
+    #print ''
+   # print 'Removing temporary files.'
+   # print '.'
+   # print '..'
+    #print '...'
+   # for rmv, in zip(samtoolsfinal):
+   #     subprocess.call(['rm', rmv])
+   # for rmv in zip(miscremoval):
+    #    subprocess.call(['rm', rmv])
+    #print ''
+   # print 'DONE!'
+   # print ''
+   # time.sleep(1)
 
 # Finish
 print ''
