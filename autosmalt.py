@@ -2,7 +2,16 @@
 import os
 import glob
 import subprocess
+import time
 from shutil import copyfile
+
+# Edits:
+# 12/5/2016:
+    # Validated pipeline on OSX to completion
+    # Removed some typing errors
+        # To Do:
+            # Validate pipeline on Linux
+            # sys.platform check if changes needed.
 
 # User input
 print '##############################'
@@ -123,7 +132,7 @@ print '.......'
 print ''
 print ''
 
-# List Printout (validation only)
+# List Printout (validation only - write to log?)
 print 'rawnameraw:'
 print rawnameraw
 print ''
@@ -163,12 +172,14 @@ copyfile(reference, directory1)
 print ''
 print ''
 print 'Preparing smalt index...'
+time.sleep(2)
 print ''
 subprocess.call(['smalt', 'index', '-k', '17', '-s', '2', 'ref', str(directory1)])
 print ''
 print ''
 print 'Index prepared!'
 print ''
+time.sleep(2)
 print ''
 print 'Preparing samtools index...'
 print ''
@@ -179,10 +190,15 @@ print '#######################'
 print '##       DONE!      ##'
 print '#######################'
 print ''
+time.sleep(1)
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(1)
 print '....'
+time.sleep(2)
 print ''
 print ''
 
@@ -195,9 +211,13 @@ print ''
 print '         WARNING!'
 print 'This process will take some time.'
 print ''
+time.sleep(1)
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(2)
 print ''
 for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
     subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
@@ -208,9 +228,13 @@ print '##       DONE!      ##'
 print '#######################'
 print ''
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(1)
 print '....'
+time.sleep(2)
 print ''
 print ''
 
@@ -222,18 +246,21 @@ print ''
 print ''
 print 'Several files will be created during this process.'
 print ''
-print 'If you opted to remove intermediate files, they will be removed when redundant.'
+print 'If you opted to remove intermediate files, they will be deleted when redundant.'
 print ''
 print '.'
+time.sleep(1)
 print '..'
+time.sleep(1)
 print '...'
+time.sleep(1)
 
-# SAM conversion
+# SAM conversion (needs work - '-bS' throwing error. OSX working, check samtools ver on lin02.)
 print ''
 print 'Converting SAM -> BAM...'
 print ''
 for sam,bam, in zip(smaltsam, samtoolsbam):
-    subprocess.call(['samtools', 'view', '-@', '12', '-bS', '-t', 'ref.fasta.fai', '-o', bam, sam])
+    subprocess.call(['samtools', 'view', '-@', '12', '-bS', '-t', 'reference.fasta.fai', '-o', bam, sam])
 print ''
 print 'DONE!'
 print ''
@@ -277,7 +304,7 @@ if choiceremoval in choiceyes:
     print '.'
     print '..'
     print '...'
-    for rmv in zip(samtoolsbam):
+    for rmv, in zip(samtoolsbam):
         subprocess.call(['rm', rmv])
     print ''
     print 'DONE!'
@@ -291,7 +318,7 @@ print ''
 print 'Removing BAM duplicates...'
 print ''
 for sort, final, in zip(samtoolssort, samtoolsfinal):
-    subprocess.call(['samtools', 'rmdup', sort, '-o', final])
+    subprocess.call(['samtools', 'rmdup', sort, final])
 print ''
 print 'DONE!'
 print ''
@@ -306,7 +333,7 @@ if choiceremoval in choiceyes:
     print '.'
     print '..'
     print '...'
-    for rmv in zip(samtoolssort):
+    for rmv, in zip(samtoolssort):
         subprocess.call(['rm', rmv])
     print ''
     print 'DONE!'
@@ -322,15 +349,15 @@ print '####################'
 print '## Generating VCF ##'
 print '####################'
 print '.'
-for final, pileup in zip(samtoolsfinal, pileupbcf):
-    subprocess.call(['samtools', 'mpileup', '-uf', str(directory1), 'final', '-o', 'pileup'])
+for final, pileup, in zip(samtoolsfinal, pileupbcf):
+    subprocess.call(['samtools', 'mpileup', '-uf', str(directory1), final, '-o', pileup])
 print '..'
 # VCF output
-for pileup, vcfraw in zip(pileupbcf, rawvcf):
-    subprocess.call(['bcftools', 'call', '--threads', '12', '--variants-only', '-vc', '-O v', pileup, '-o', vcfraw])
+for pileup, vcfraw, in zip(pileupbcf, rawvcf):
+    subprocess.call(['bcftools', 'call', '--threads', '12', '--variants-only', '-vc', '-O', 'v', pileup, '-o', vcfraw])
 print '...'
 # Final VCF (overwrites intermediate)
-for vcf in zip(rawvcf):
+for vcf, in zip(rawvcf):
     subprocess.call(['vcftools', '--vcf', vcf, '--remove-indels', '--minQ', '30', '--minDP', '8', '--max-maf', '0.1', '--recode-INFO-all', '--recode'])
 print '...'
 print ''
