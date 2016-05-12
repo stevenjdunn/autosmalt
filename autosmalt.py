@@ -9,16 +9,17 @@ from shutil import copyfile
 # 12/5/2016:
     # Validated pipeline on OSX to completion
     # Validated pipeline on Linux to completion
+    # Tried to break it, found error when aligning extremely different sequences (i.e. different genera)
     # Removed some typing errors
         # To Do:
-            # Further cleanup of file output:
+            # Further cleanup of file output (done, untested):
                 # rawname.bam
                 # rawname.bcf
                 # rawname.log
                 # ref.sma
                 # ref.smi
                 # refrence.fasta.fai
-            # Move VCF's to directory?
+            # Move VCF's to directory? (done, untested)
             # Create report from identical SNPs?
 
 # User input
@@ -371,6 +372,32 @@ print ''
 print '#######################'
 print '##       DONE!      ##'
 print '#######################'
+
+# VCF Move
+outputfolder1 = directory
+outputfolder1 += 'vcf/'
+if not os.path.exists(outputfolder1):
+    os.mkdir(outputfolder1)
+movetarget = [outputfolder1 + x for x in vcfraw]
+for move, target, in zip(vcfraw, movetarget):
+    subprocess.call('mv', move, target)
+
+# Final removal (optional)
+if choiceremoval in choiceyes:
+    miscremoval = ['ref.smi', 'ref.sma', 'reference.fasta.fai']
+    print ''
+    print 'Removing temporary files.'
+    print '.'
+    print '..'
+    print '...'
+    for rmv, in zip(samtoolsfinal):
+        subprocess.call(['rm', rmv])
+    for rmv in zip(miscremoval):
+        subprocess.call(['rm', rmv])
+    print ''
+    print 'DONE!'
+    print ''
+    time.sleep(1)
 
 # Finish
 print ''
