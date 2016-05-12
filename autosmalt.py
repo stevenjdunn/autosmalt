@@ -180,7 +180,7 @@ copyfile(reference, directory1)
 print ''
 print ''
 print 'Preparing smalt index...'
-time.sleep(2)
+time.sleep(1)
 print ''
 subprocess.call(['smalt', 'index', '-k', '17', '-s', '2', 'ref', str(directory1)])
 print ''
@@ -192,8 +192,10 @@ print ''
 print 'Preparing samtools index...'
 time.sleep(1)
 print ''
-print 'Index prepared!'
 subprocess.call(['samtools', 'faidx', str(directory1)])
+time.sleep(1)
+print 'Index prepared!'
+time.sleep(1)
 print ''
 print ''
 print '#######################'
@@ -206,8 +208,6 @@ time.sleep(1)
 print '..'
 time.sleep(1)
 print '...'
-time.sleep(1)
-print '....'
 time.sleep(1)
 print ''
 print ''
@@ -227,6 +227,8 @@ for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
     subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
 print ''
 print ''
+time.sleep(1)
+
 print '#######################'
 print '##       DONE!      ##'
 print '#######################'
@@ -252,18 +254,13 @@ print 'Several files will be created during this process.'
 print ''
 print 'If you opted to remove intermediate files, they will be deleted when redundant.'
 print ''
-print '.'
-time.sleep(1)
-print '..'
-time.sleep(1)
-print '...'
-time.sleep(1)
+time.sleep(2)
 
 # SAM conversion
 print ''
 print 'Converting SAM -> BAM...'
 print ''
-for sam,bam, in zip(smaltsam, samtoolsbam):
+for sam, bam, in zip(smaltsam, samtoolsbam):
     subprocess.call(['samtools', 'view', '-@', '12', '-bS', '-t', 'reference.fasta.fai', '-o', bam, sam])
 print ''
 print 'DONE!'
@@ -369,6 +366,7 @@ for vcf, in zip(rawvcf):
 print '...'
 print ''
 print ''
+time.sleep(2)
 print ''
 print '#######################'
 print '##       DONE!      ##'
