@@ -1,9 +1,9 @@
 # autosmalt
 Automatic read mapping of FastQ sequence data against a reference sequence - from .gz to filtered .vcf with as little hands on time as possible.
 
-Pipeline
+### Pipeline
 
-smalt index -k 17 -s 2 Refindex ?.fasta 
+smalt index -k 17 -s 2 Refindex ?.fasta
 smalt map -f sam -o ?.sam Refindex ?_1.fastq ?_2.fastq 
 samtools faidx ref.fasta 
 samtools view -@ 16 -bS -t ref.fasta.fai -o ?.bam ?.sam 
@@ -15,18 +15,18 @@ vcftools --vcf ?.vcf --remove-indels --minQ 30 --minDP 8 --max-maf 0.1 --recode-
 
 You can tweak the commands at will by editing the called python subprocess function. For example, forcing SMALT to use an exhaustive search would usually require you to specify the flag '-x' - to add that to this program you would edit at line 155:
 
-Original:
+### Original:
 for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
     subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
  
-With exhaustive flat:
+With exhaustive flag:
 for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
-    subprocess.call(['smalt', 'map', '-n', '12', '-x', '-f', 'sam', '-o', sam,'ref', r1, r2)]SMALT
+    subprocess.call(['smalt', 'map', '-n', '12', **'-x'**, '-f', 'sam', '-o', sam,'ref', r1, r2)]SMALT
                                                 ^^^^^^
 The flag would need to be inbetween ' characters, and be separated from other variables by a comma. 
 
 
-Files
+### Files
 
 This program assumes your fastq data is still labelled using the Illumina naming scheme - it can take either raw zipped (.gz) or unzipped (.fastq) read files directly from machine output.
 
@@ -38,7 +38,7 @@ e.g. sample1_R1.fastq would result in a VCF output 'sample1.vcf
      
      
 
-Disk Space
+### Disk Space
 
 Mapping will consume large amounts of disk space. The program will if instructed remove intermediate files once they are no longer needed. This howevever will still produce a lot of data and as such sufficient disk space is required on the disk containing your read files. 
 
@@ -46,18 +46,18 @@ Opting to remove intermediate files will get rid of everything except the final 
 
 
 
-Known Issues:
+### Known Issues:
 
 If a sample is vastly different to the reference, you may experience truncated file errors: I validated this using reads against a different species assembly. I have not been able to reproduce the error with very distantly related members of the same species, or  genus.
 
 
 
-Dependencies (validated version):
+### Dependencies (validated version):
 
-Samtools (1.3): http://samtools.sourceforge.net/
-BCFtools (1.3): https://samtools.github.io/bcftools/bcftools.html
-SMALT (0.7.6): http://www.sanger.ac.uk/science/tools/smalt-0
-VCFtools (0.1.14): http://vcftools.sourceforge.net/
+[Samtools](http://samtools.sourceforge.net/) (1.3) 
+[BCFtools](https://samtools.github.io/bcftools/bcftools.html) (1.3) 
+[SMALT](http://www.sanger.ac.uk/science/tools/smalt-0) (0.7.6)
+[VCFtools](http://vcftools.sourceforge.net/) (0.1.14)
 
 Tested on OSX El Capitan and Ubuntu 14.04 LTS.
 
