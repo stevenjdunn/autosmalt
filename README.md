@@ -1,6 +1,30 @@
 # autosmalt
 Automatic read mapping of FastQ sequence data against a reference sequence - from .gz to filtered .vcf with as little hands on time as possible.
 
+Pipeline
+smalt index -k 17 -s 2 Refindex ?.fasta
+smalt map -f sam -o ?.sam Refindex ?_1.fastq ?_2.fastq
+samtools faidx ref.fasta
+samtools view -@ 16 -bS -t ref.fasta.fai -o ?.bam ?.sam
+samtools sort -@ 16 ?.bam -o ?.sort
+samtools rmdup ?.sort.bam ?.out.bam
+samtools mpileup -uf ref.fasta ?.out.bam -o ?.bcf
+bcftools call --threads 12 --variants-only -vc -O v ?.bcf -o ?.vcf
+vcftools --vcf ?.vcf --remove-indels --minQ 30 --minDP 8 --max-maf 0.1 --recode-INFO-all
+
+You can tweak the commands at will by editing the called python subprocess function. For example, forcing SMALT to use an exhaustive search would usually require you to specify the flag '-x' - to add that to this program you would edit at line 155:
+
+Original:
+for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
+    subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
+ 
+With exhaustive flat:
+for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
+    subprocess.call(['smalt', 'map', '-n', '12', '-x', '-f', 'sam', '-o', sam,'ref', r1, r2)]SMALT
+                                                ^^^^^^
+The flag would need to be inbetween ' characters, and be separated from other variables by a comma. 
+
+
 Files
 
 This program assumes your fastq data is still labelled using the Illumina naming scheme - it can take either raw zipped (.gz) or unzipped (.fastq) read files directly from machine output.
