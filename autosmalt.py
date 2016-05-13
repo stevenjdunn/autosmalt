@@ -3,24 +3,7 @@ import os
 import glob
 import subprocess
 import time
-from shutil import copyfile
-
-# Edits:
-# 12/5/2016:
-    # Validated pipeline on OSX to completion
-    # Validated pipeline on Linux to completion
-    # Tried to break it, found error when aligning extremely different sequences (i.e. different genera)
-    # Removed some typing errors
-        # To Do:
-            # Further cleanup of file output (tested, not working, hashed):
-                # rawname.bam
-                # rawname.bcf
-                # rawname.log
-                # ref.sma
-                # ref.smi
-                # refrence.fasta.fai
-            # Move VCF's to directory? (untested, hashed)
-            # Create report from identical SNPs?
+import shutil
 
 # User input
 print '##############################'
@@ -33,6 +16,7 @@ print ''
 print 'It will also consume a large amount of disk space on the drive containing your FastQ files.'
 print ''
 print ''
+time.sleep(1)
 print ''
 print "Are your FastQ reads still zipped? (i.e. *.gz)"
 print ''
@@ -48,11 +32,13 @@ if not os.path.exists(directory):
     print '##  ERROR!  ##'
     print '##############'
     print ''
+    time.sleep(1)
     print ''
     print "Directory does not exist!"
     print ''
     print "Please ensure you are specifying a complete path, i.e. /home/user/Desktop/folder/"
     print ''
+    time.sleep(1)
     print ''
     print '#################'
     print '##   EXITING   ##'
@@ -61,6 +47,7 @@ if not os.path.exists(directory):
 print ''
 print ''
 print 'Directory sucessfully located...'
+time.sleep(1)
 print ''
 print ''
 reference = raw_input("Complete path to reference sequence in FASTA format:")
@@ -71,11 +58,13 @@ if not os.path.exists(reference):
     print '##  ERROR!  ##'
     print '##############'
     print ''
+    time.sleep(1)
     print ''
     print "Reference sequence cannot be found at that location."
     print ''
     print "Please ensure you are specifying a complete path, i.e. /home/user/Desktop/folder/"
     print ''
+    time.sleep(1)
     print ''
     print '#################'
     print '##   EXITING   ##'
@@ -84,6 +73,7 @@ if not os.path.exists(reference):
 print ''
 print ''
 print 'Reference successfully located...'
+time.sleep(1)
 print ''
 print ''
 print 'Mapping produces several intermediate (and often near duplicate) files.'
@@ -100,6 +90,7 @@ if choice in choiceyes:
     print '## Extracting reads ##'
     print '######################'
     print ''
+    time.sleep(1)
     print ''
     gzip = list(glob.glob(os.path.join(directory, '*.gz')))
     for gz, in zip(gzip):
@@ -110,63 +101,40 @@ if choice in choiceyes:
     print '##       DONE!      ##'
     print '#######################'
     print ''
+    time.sleep(1)
     print ''
 
 # Varable generation
 print 'Processing'
+time.sleep(1)
 print '.'
 readoneraw = list(glob.glob(os.path.join(directory, '*R1*')))
 readoneraw.sort()
 readtworaw = list(glob.glob(os.path.join(directory, '*R2*')))
 readtworaw.sort()
 print '..'
+time.sleep(1)
 rawnameraw = [x.split(directory)[1].split('_')[0] for x in readoneraw]
 rawnameraw.sort()
 rawname = [s.strip('/') for s in rawnameraw]
 directory1 = str(directory)
 directory1 += 'reference.fasta'
 print '...'
+time.sleep(1)
 
 # List comprehension
 smaltsam = [x + '.sam' for x in rawname]
-print '....'
 samtoolsbam = [x + '_temp.bam' for x in rawname]
 samtoolssort = [x + '_sort_temp.bam' for x in rawname]
-print '.....'
+print '....'
+time.sleep(1)
 samtoolsfinal = [x + '.bam' for x in rawname]
 pileupbcf = [x + '.bcf' for x in rawname]
-print '......'
 rawvcf = [x + '.vcf' for x in rawname]
-print '.......'
+print '.....'
+time.sleep(1)
 print ''
 print ''
-
-# List Printout (validation only - write to log?)
-print 'rawnameraw:'
-print rawnameraw
-print ''
-print 'rawname:'
-print rawname
-print ''
-print 'smaltsam:'
-print smaltsam
-print ''
-print 'samtoolsbam:'
-print samtoolsbam
-print ''
-print 'samtoolssort:'
-print samtoolssort
-print ''
-print 'samtoolsfinal:'
-print samtoolsfinal
-print ''
-print 'pileupbcf:'
-print pileupbcf
-print ''
-print 'rawvcf:'
-print rawvcf
-print ''
-
 
 # Index generation
 print ''
@@ -176,8 +144,9 @@ print '## Commencing Index Generation  ##'
 print '##################################'
 print ''
 print ''
+time.sleep(1)
 os.chdir(directory)
-copyfile(reference, directory1)
+shutil.copyfile(reference, directory1)
 print ''
 print ''
 print 'Preparing smalt index...'
@@ -203,15 +172,10 @@ print '#######################'
 print '##       DONE!      ##'
 print '#######################'
 print ''
-time.sleep(1)
-print '.'
-time.sleep(1)
-print '..'
-time.sleep(1)
-print '...'
-time.sleep(1)
 print ''
 print ''
+print ''
+time.sleep(1)
 
 # Smalt mapping
 print '###############################'
@@ -219,10 +183,11 @@ print '##  Commencing Read Mapping  ##'
 print '###############################'
 print ''
 print ''
+time.sleep(1)
 print '         WARNING!'
 print 'This process will take some time.'
 print ''
-time.sleep(3)
+time.sleep(2)
 print ''
 for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
     subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
@@ -234,16 +199,10 @@ print '#######################'
 print '##       DONE!      ##'
 print '#######################'
 print ''
-print '.'
-time.sleep(1)
-print '..'
-time.sleep(1)
-print '...'
-time.sleep(1)
-print '....'
-time.sleep(2)
 print ''
 print ''
+print ''
+time.sleep(1)
 
 # Conversion pretext
 print '################################'
@@ -251,6 +210,7 @@ print '##  Commencing File Curation  ##'
 print '################################'
 print ''
 print ''
+time.sleep(1)
 print 'Several files will be created during this process.'
 print ''
 print 'If you opted to remove intermediate files, they will be deleted when redundant.'
@@ -266,11 +226,6 @@ for sam, bam, in zip(smaltsam, samtoolsbam):
 print ''
 print 'DONE!'
 print ''
-print '.'
-time.sleep(1)
-print '..'
-time.sleep(1)
-print '...'
 time.sleep(1)
 
 
@@ -278,9 +233,7 @@ time.sleep(1)
 if choiceremoval in choiceyes:
     print ''
     print 'Removing temporary files.'
-    print '.'
-    print '..'
-    print '...'
+    print ''
     for rmv, in zip(smaltsam):
         subprocess.call(['rm', rmv])
     print ''
@@ -296,20 +249,13 @@ for bam, sort, in zip(samtoolsbam, samtoolssort):
 print ''
 print 'DONE!'
 print ''
-print '.'
-time.sleep(1)
-print '..'
-time.sleep(1)
-print '...'
 time.sleep(1)
 
 # BAM removal (optional)
 if choiceremoval in choiceyes:
     print ''
     print 'Removing temporary files.'
-    print '.'
-    print '..'
-    print '...'
+    print ''
     for rmv, in zip(samtoolsbam):
         subprocess.call(['rm', rmv])
     print ''
@@ -353,6 +299,9 @@ print ''
 print '####################'
 print '## Generating VCF ##'
 print '####################'
+print ''
+print ''
+time.sleep(1)
 print '.'
 for final, pileup, in zip(samtoolsfinal, pileupbcf):
     subprocess.call(['samtools', 'mpileup', '-uf', str(directory1), final, '-o', pileup])
@@ -366,49 +315,89 @@ for vcf, in zip(rawvcf):
     subprocess.call(['vcftools', '--vcf', vcf, '--remove-indels', '--minQ', '30', '--minDP', '8', '--max-maf', '0.1', '--recode-INFO-all'])
 print '...'
 print ''
+print 'Cleaning up.'
+print ''
+print '.'
+print '..'
+print '...'
+print ''
+# VCF Move
+outputfolder1 = directory
+outputfolder1 += 'vcf/'
+if not os.path.exists(outputfolder1):
+    os.mkdir(outputfolder1)
+vcfs = os.listdir(directory)
+for v in vcfs:
+    if (v.endswith(".vcf")):
+        shutil.move(v, outputfolder1)
+# BCF Move
+outputfolder2 = directory
+outputfolder2 += 'bcf/'
+if not os.path.exists(outputfolder2):
+    os.mkdir(outputfolder2)
+bcfs = os.listdir(directory)
+for b in bcfs:
+    if (b.endswith(".bcf")):
+        shutil.move(b, outputfolder2)
+print ''
+print 'DONE!'
+print ''
+time.sleep(1)
+
+# Final removal (optional)
+
+if choiceremoval in choiceyes:
+    miscremoval = ['ref.smi', 'ref.sma', 'reference.fasta.fai', 'out.log']
+    print ''
+    print 'Removing temporary files.'
+    print '.'
+    print '..'
+    print '...'
+    for rmv, in zip(samtoolsfinal):
+        subprocess.call(['rm', rmv])
+    for rmv, in zip(miscremoval):
+        subprocess.call(['rm', rmv])
+    print ''
+    print 'DONE!'
+    print ''
+
 print ''
 time.sleep(2)
 print ''
 print '#######################'
 print '##       DONE!      ##'
 print '#######################'
+time.sleep(1)
 
-# VCF Move
-#outputfolder1 = directory
-#outputfolder1 += 'vcf/'
-#if not os.path.exists(outputfolder1):
-#    os.mkdir(outputfolder1)
-#movetarget = [outputfolder1 + x for x in vcfraw]
-#for move, target, in zip(vcfraw, movetarget):
-#    subprocess.call('mv', move, target)
 
-# Final removal (optional)
-#if choiceremoval in choiceyes:
-   # miscremoval = ['ref.smi', 'ref.sma', 'reference.fasta.fai']
-    #print ''
-   # print 'Removing temporary files.'
-   # print '.'
-   # print '..'
-    #print '...'
-   # for rmv, in zip(samtoolsfinal):
-   #     subprocess.call(['rm', rmv])
-   # for rmv in zip(miscremoval):
-    #    subprocess.call(['rm', rmv])
-    #print ''
-   # print 'DONE!'
-   # print ''
-   # time.sleep(1)
+
 
 # Finish
 print ''
 print ''
 print 'Pipeline complete!'
 print ''
-print 'Author: Steven Dunn'
+print ''
+print 'BCF files located in:',
+print outputfolder2
+print ''
+print ''
+print 'VCF files located in:',
+print outputfolder1
+print ''
+print ''
+print 'Pipeline author: Steven Dunn'
+print ''
 print 'www.stevendunn.co.uk'
+print ''
+print ''
+print 'Real programming credit to SAMtools, BCFTools, VCFtools and SMALT.'
+print ''
+print 'Visit www.github.com/stevenjdunn/autosmalt for more info.'
 print ''
 print ''
 print '################'
 print '##  Finished  ##'
 print '################'
+print ''
 exit(1)
