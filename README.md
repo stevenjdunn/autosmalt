@@ -24,14 +24,16 @@ vcftools --vcf ?.vcf --remove-indels --minQ 30 --minDP 8 --max-maf 0.1 --recode-
 
 You can tweak the commands at will by editing the called python subprocess function. For example, forcing SMALT to use an exhaustive search would usually require you to specify the flag '-x' - to add that to this program you would edit at line 155:
 
-### Original:
-for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
-    subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
- 
-With exhaustive flag:
-for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
-    subprocess.call(['smalt', 'map', '-n', '12', **'-x'**, '-f', 'sam', '-o', sam,'ref', r1, r2)]SMALT
-                                                ^^^^^^
+**Original:**
+
+subprocess.call(['smalt', 'map', '-n', '12', '-f', 'sam', '-o', sam,'ref', r1, r2])
+    
+    
+**With exhaustive flag:**
+
+subprocess.call(['smalt', 'map', '-n', '12', **'-x'**, '-f', 'sam', '-o', sam,'ref', r1, r2)]SMALT
+
+
 The flag would need to be inbetween ' characters, and be separated from other variables by a comma. 
 
 
