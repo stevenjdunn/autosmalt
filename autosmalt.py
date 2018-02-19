@@ -8,7 +8,7 @@ import argparse
 import re
 
 # Argparse argument setup
-parser = argparse.ArgumentParser(description="Hands free MinION data processing using Porechop for barcode trimming/binning, and Unicycler for assembly.")
+parser = argparse.ArgumentParser(description="Automatic read mapping of FastQ sequence data against a specified reference - from .gz to .vcf with as little hands on time as possible.")
 requiredargs = parser.add_argument_group('required arguments')
 requiredargs.add_argument("-i", "--input", required=True, help="Path directory containing raw Illumina reads.")
 requiredargs.add_argument("-r", "--reference", required=True, help="Path to reference FASTA file.")
