@@ -4,6 +4,39 @@ import glob
 import subprocess
 import time
 import shutil
+import argparse
+import re
+
+# Argparse argument setup
+parser = argparse.ArgumentParser(description="Hands free MinION data processing using Porechop for barcode trimming/binning, and Unicycler for assembly.")
+requiredargs = parser.add_argument_group('required arguments')
+requiredargs.add_argument("-i", "--input", required=True, help="Path directory containing raw Illumina reads.")
+requiredargs.add_argument("-r", "--reference", required=True, help="Path to reference FASTA file.")
+requiredargs.add_argument("-o", "--output", required=True, help="Path to output destination")
+parser.add_argument("-g", "--gzipped", action='store_true', help="Specifies that reads are gzipped (i.e. *.gz)")
+parser.add_argument("-d", "--delete", action='store_true', help="Deletes intermediate files.")
+args = parser.parse_args()
+
+# Colour set up
+class colours:
+    warning = '\033[91m'
+    blue = '\033[94m'
+    invoking = '\033[93m'
+    bold = '\033[1m'
+    term = '\033[0m'
+
+# Logger set up
+ansi_rm = re.compile(r'\x1b\[[0-9;]*m')
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        self.log = open("autosmalt.log", "w")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(re.sub(ansi_rm, '', message))
+
+sys.stdout = Logger()
 
 # User input
 print '##############################'
@@ -18,75 +51,56 @@ print ''
 print ''
 time.sleep(1)
 print ''
-print "Are your FastQ reads still zipped? (i.e. *.gz)"
-print ''
-choice = raw_input("Y/N:").lower()
-print ''
-print ''
-choiceyes = ['y', 'ye', 'yes', '']
-directory = raw_input("Complete path to directory containing reads:")
-if not os.path.exists(directory):
-    print ''
+# Directory orientation
+invoked_from = os.getcwd()
+os.chdir(args.output)
+directory = os.getcwd()
+os.chdir(invoked_from)
+if not os.path.exists(args.input):
+    print colours.warning + ''
     print ''
     print '##############'
     print '##  ERROR!  ##'
     print '##############'
     print ''
-    time.sleep(1)
     print ''
     print "Directory does not exist!"
     print ''
     print "Please ensure you are specifying a complete path, i.e. /home/user/Desktop/folder/"
     print ''
-    time.sleep(1)
     print ''
     print '#################'
     print '##   EXITING   ##'
-    print '#################'
+    print '#################' + colours.term
     exit(1)
 print ''
 print ''
 print 'Directory sucessfully located...'
-time.sleep(1)
 print ''
 print ''
 reference = raw_input("Complete path to reference sequence in FASTA format:")
-if not os.path.exists(reference):
-    print ''
+if not os.path.exists(args.reference):
+    print colours.warning + ''
     print ''
     print '##############'
     print '##  ERROR!  ##'
     print '##############'
     print ''
-    time.sleep(1)
     print ''
     print "Reference sequence cannot be found at that location."
     print ''
     print "Please ensure you are specifying a complete path, i.e. /home/user/Desktop/folder/"
     print ''
-    time.sleep(1)
     print ''
     print '#################'
     print '##   EXITING   ##'
-    print '#################'
+    print '#################' + colours.term
     exit(1)
-print ''
-print ''
-print 'Reference successfully located...'
-time.sleep(1)
-print ''
-print ''
-print 'Mapping produces several intermediate (and often near duplicate) files.'
-print ''
-print 'Would you like to remove them after use to conserve disk space?'
-print ''
-choiceremoval = raw_input('Y/N:').lower()
-print ''
 print ''
 
 # Gzip Extraction (optional)
-if choice in choiceyes:
-    print '######################'
+if args.gzipped:
+    print colours.bold + '######################'
     print '## Extracting reads ##'
     print '######################'
     print ''
@@ -99,13 +113,13 @@ if choice in choiceyes:
     print ''
     print '#######################'
     print '##       DONE!      ##'
-    print '#######################'
+    print '#######################' + colours.term
     print ''
     time.sleep(1)
     print ''
 
 # Varable generation
-print 'Processing'
+print colours.invoking + 'Processing...'
 time.sleep(1)
 print '.'
 readoneraw = list(glob.glob(os.path.join(directory, '*R1*')))
@@ -131,46 +145,46 @@ time.sleep(1)
 samtoolsfinal = [x + '.bam' for x in rawname]
 pileupbcf = [x + '.bcf' for x in rawname]
 rawvcf = [x + '.vcf' for x in rawname]
-print '.....'
+print '.....' + colours.term
 time.sleep(1)
 print ''
 print ''
 
 # Index generation
 print ''
-print ''
+print '' + colours.bold
 print '##################################'
 print '## Commencing Index Generation  ##'
-print '##################################'
+print '##################################' + colours.term
 print ''
 print ''
 time.sleep(1)
 os.chdir(directory)
 shutil.copyfile(reference, directory1)
 print ''
-print ''
-print 'Preparing smalt index...'
+print '' + colours.invoking
+print 'Preparing smalt index...' + colours.term
 time.sleep(1)
 print ''
 subprocess.call(['smalt', 'index', '-k', '17', '-s', '2', 'ref', str(directory1)])
 print ''
-print ''
-print 'Index prepared!'
+print '' + colours.bold
+print 'Index prepared!' + colours.term
 print ''
 time.sleep(1)
-print ''
-print 'Preparing samtools index...'
+print '' + colours.invoking
+print 'Preparing samtools index...' + colours.term
 time.sleep(1)
 print ''
 subprocess.call(['samtools', 'faidx', str(directory1)])
 time.sleep(1)
-print 'Index prepared!'
+print colours.bold + 'Index prepared!'
 time.sleep(1)
 print ''
 print ''
 print '#######################'
 print '##       DONE!      ##'
-print '#######################'
+print '#######################' + colours.term
 print ''
 print ''
 print ''
@@ -178,14 +192,14 @@ print ''
 time.sleep(1)
 
 # Smalt mapping
-print '###############################'
+print colours.bold + '###############################'
 print '##  Commencing Read Mapping  ##'
-print '###############################'
+print '###############################' + colurs.term
 print ''
 print ''
 time.sleep(1)
-print '         WARNING!'
-print 'This process will take some time.'
+print colours.blue + '         WARNING!'
+print 'This process will take some time.' + colours.term
 print ''
 time.sleep(2)
 print ''
@@ -194,10 +208,9 @@ for r1,r2,sam, in zip(readoneraw, readtworaw, smaltsam):
 print ''
 print ''
 time.sleep(1)
-
-print '#######################'
+print colours.bold + '#######################'
 print '##       DONE!      ##'
-print '#######################'
+print '#######################' + colours.term
 print ''
 print ''
 print ''
@@ -205,9 +218,9 @@ print ''
 time.sleep(1)
 
 # Conversion pretext
-print '################################'
+print colours.bold + '################################'
 print '##  Commencing File Curation  ##'
-print '################################'
+print '################################' + colours.term
 print ''
 print ''
 time.sleep(1)
@@ -218,8 +231,8 @@ print ''
 time.sleep(2)
 
 # SAM conversion
-print ''
-print 'Converting SAM -> BAM...'
+print '' + colours.invoking
+print 'Converting SAM -> BAM...' + colours.term
 print ''
 for sam, bam, in zip(smaltsam, samtoolsbam):
     subprocess.call(['samtools', 'view', '-@', '12', '-bS', '-t', 'reference.fasta.fai', '-o', bam, sam])
@@ -228,21 +241,21 @@ print 'DONE!'
 print ''
 time.sleep(1)
 
-
 # SAM removal (optional)
-if choiceremoval in choiceyes:
-    print ''
+if args.delete:
+    print '' + colours.invoking
     print 'Removing temporary files.'
-    print ''
+    print '' + colours.term
     for rmv, in zip(smaltsam):
         subprocess.call(['rm', rmv])
     print ''
     print 'DONE!'
     print ''
     time.sleep(1)
+
 # BAM sort
-print ''
-print 'Sorting BAM files...'
+print '' + colours.invoking
+print 'Sorting BAM files...' + colours.term
 print ''
 for bam, sort, in zip(samtoolsbam, samtoolssort):
     subprocess.call(['samtools', 'sort', '-@', '12', bam, '-o', sort])
@@ -252,9 +265,9 @@ print ''
 time.sleep(1)
 
 # BAM removal (optional)
-if choiceremoval in choiceyes:
-    print ''
-    print 'Removing temporary files.'
+if args.delete:
+    print '' + colours.invoking
+    print 'Removing temporary files.' + colours.term
     print ''
     for rmv, in zip(samtoolsbam):
         subprocess.call(['rm', rmv])
@@ -264,8 +277,8 @@ if choiceremoval in choiceyes:
     time.sleep(1)
 
 # BAM rmdup
-print ''
-print 'Removing BAM duplicates...'
+print '' + colours.invoking
+print 'Removing BAM duplicates...' + colours.term
 print ''
 for sort, final, in zip(samtoolssort, samtoolsfinal):
     subprocess.call(['samtools', 'rmdup', sort, final])
@@ -280,9 +293,9 @@ print '...'
 time.sleep(1)
 
 # BAM sort removal (optional)
-if choiceremoval in choiceyes:
-    print ''
-    print 'Removing temporary files.'
+if args.delete:
+    print '' + colours.invoking
+    print 'Removing temporary files.' + colours.term
     print '.'
     print '..'
     print '...'
@@ -295,10 +308,10 @@ if choiceremoval in choiceyes:
 
 # BCF/VCF generation
 print ''
-print ''
+print '' + colours.bold
 print '####################'
 print '## Generating VCF ##'
-print '####################'
+print '####################' + colours.term
 print ''
 print ''
 time.sleep(1)
@@ -314,8 +327,8 @@ print '...'
 for vcf, in zip(rawvcf):
     subprocess.call(['vcftools', '--vcf', vcf, '--remove-indels', '--minQ', '30', '--minDP', '8', '--max-maf', '0.1', '--recode-INFO-all'])
 print '...'
-print ''
-print 'Cleaning up.'
+print '' + colours.invoking
+print 'Cleaning up.' + colours.term
 print ''
 print '.'
 print '..'
@@ -346,10 +359,10 @@ time.sleep(1)
 
 # Final removal (optional)
 
-if choiceremoval in choiceyes:
+if args.delete:
     miscremoval = ['ref.smi', 'ref.sma', 'reference.fasta.fai', 'out.log']
-    print ''
-    print 'Removing temporary files.'
+    print '' + colours.invoking
+    print 'Removing temporary files.' + colours.term
     print '.'
     print '..'
     print '...'
@@ -363,41 +376,30 @@ if choiceremoval in choiceyes:
 
 print ''
 time.sleep(2)
-print ''
+print '' + colours.bold
 print '#######################'
 print '##       DONE!      ##'
-print '#######################'
+print '#######################' + colours.term
 time.sleep(1)
-
-
-
 
 # Finish
 print ''
+print '' + colours.bold
+print 'Pipeline complete!' + colours.term
 print ''
-print 'Pipeline complete!'
-print ''
-print ''
-print 'BCF files located in:',
+print '' + colours.blue
+print 'BCF files located in:' + colours.term,
 print outputfolder2
 print ''
-print ''
-print 'VCF files located in:',
+print '' + colours.blue
+print 'VCF files located in:' + colours.term,
 print outputfolder1
 print ''
 print ''
-print 'Pipeline author: Steven Dunn'
-print ''
-print 'www.stevendunn.co.uk'
-print ''
-print ''
-print 'Real programming credit to SAMtools, BCFTools, VCFtools and SMALT.'
-print ''
-print 'Visit www.github.com/stevenjdunn/autosmalt for more info.'
-print ''
-print ''
+print 'Author: www.github.com/stevenjdunn/'
+print '' + colours.bold
 print '################'
 print '##  Finished  ##'
-print '################'
+print '################' + colours.term
 print ''
 exit(1)
